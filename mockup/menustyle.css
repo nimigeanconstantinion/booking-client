@@ -1,0 +1,42 @@
+body{
+    position: relative;
+    display: block;
+}
+.meniu1 {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+  }
+  
+  .meniux {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .submeniu1 {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  
+  .submeniu1 div {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .submeniu1 div:hover {background-color: #ddd;}
+  
+  .meniux:hover .submeniu1 {display: inline-block;}
+  
+  .meniux:hover .meniu1 {
+    
+    background-color: #3e8e41;
+    display: inline-block;
+} 
