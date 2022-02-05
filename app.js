@@ -3,6 +3,9 @@
 // let minute = ld.getMinutes();
 // console.log(ore + ":" + minute);
 
+import { Api } from "./api.js";
+
 import { Home } from "./components/Home.js";
 
 let home = new Home();
+

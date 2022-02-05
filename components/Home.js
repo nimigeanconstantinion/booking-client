@@ -10,10 +10,14 @@ class Home {
     this.per = 0;
     this.pause = 0;
     this.serv = 0;
+    this.cnt = 0;
     this.api = new Api();
     this.init();
     this.main.addEventListener("click", this.clkMain);
+    this.container = document.querySelector("#book");
+    this.container.addEventListener("change", this.changeCard);
   }
+
   init = () => {
     this.main.innerHTML = ``;
     this.main.innerHTML = `
@@ -41,8 +45,8 @@ class Home {
   loadSlotsZi = async (zi, serv) => {
       try {
         let response= await this.api.getSlotsDay(zi, serv);
-          
-          return response;
+        
+        return response;
           
       } catch (e){
           throw new Error(e);
@@ -55,34 +59,72 @@ class Home {
 
   createBooking = async () => {
     await this.openDay(this.d1, this.d2, this.per, this.pause, this.serv);
-    this.sloturi = await this.loadSlotsZi(this.d1, this.serv);
-    let bookArea = document.querySelector("#book");
-      let content = ``;
       
-  };
+  }
+
+  showDay =async () => {
+    this.sloturi = await this.loadSlotsZi(this.d1, this.serv);
+    this.loadBookArea();    
+  }
+
+  loadBookArea = () => {
+    let dt = new Date(this.d1);
+    let bookArea = document.querySelector("#book");
+    let content = ``;
+    let top = document.querySelector(".topmain");
+    let elm = document.createElement("h1");
+    let dtt = ('0' + dt.getDate()).slice(-2) + '.' + ('0' + (dt.getMonth() + 1)).slice(-2) + '.'
+      + dt.getFullYear();
+    elm.textContent = "Lista programare pentru data de "+dtt+" la serviciul " + this.serv.toUpperCase();
+    top.appendChild(elm);
+    this.sloturi.forEach(e => {
+      content += this.mkCard(e);
+    })
+    bookArea.innerHTML = content;
+    let carduri = bookArea.children;
+    console.log("avem caduri ="+carduri.length)
+    this.sloturi.forEach(e => {
+      console.log(e.client.length);
+      if (e.client.length > 0) {
+        let index = this.sloturi.indexOf(e);
+        console.log("index="+index);
+        carduri[index].style.backgroundColor = "rgb(231, 161, 161)";
+      }    
+
+    });
+    
+
+  }
+
   mkCard = (book) => {
-    let card = document.createElement("div");
-    card.className = "card";
-    let t1h = book.data1.getHours();
-    let t1m = book.data1.getMinutes();
+    console.log(book);
+    let t1 = new Date(book.data1);
+    let t2 = new Date(book.data2);
+    
+    let tm1 = t1.toTimeString();
+    let tm2 = t2.toTimeString();
+    
     let c = book.client;
     let obs = book.obs;
-    card.innerHTML = `
-        <p>Slot nr: ${++cnt}</p>
+    
+    let retcard = `
+    <div class="card">
+        <p class="hid">${book.id}</p>
+        <p>Slot nr: ${++this.cnt}</p>
         <div id="interval">
-            <input type="time" name="" id="dstart" readonly value="${t1h}:${t1m}:00">
-            <input type="time" name="" id="dfin" readonly value="${t2h}:${t2m}:00">
+            <input type="time" name="" id="dstart" readonly value=${tm1}>
+            <input type="time" name="" id="dfin" readonly value=${tm2}>
         </div>
         <label for="dclient">Name</label>
         <input type="text" name="dclient" id="dclient" value="${c}">
         <label for="dobst">Obs</label>
-        <textarea name="" id="dobs" cols="30" rows="3" value="${obs}"></textarea>
-   
-        
-        `;
-    return card;
-  };
+        <textarea name="" id="dobs" cols="30" rows="2" value="">${book.obs}</textarea>
+    </div>
+    `;
+    return retcard;
+  }
 
+  
   initTopMain = (tip) => {
     let top = document.querySelector(".topmain");
     if (tip == "makeslots") {
@@ -136,15 +178,27 @@ class Home {
     }
   };
 
-  clkMain = (e) => {
+  updateBook = async (book) => {
+    try {
+      let response=await this.api.updateProgramare(book);
+      return response;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  clkMain =async (e) => {
     //e.preventDefault();
     let elem = e.target;
     console.log(elem);
     if (elem.id == "mks") {
+      let bookArea = document.querySelector("#book");
+      bookArea.innerHTML = ``;
       this.initTopMain("makeslots");
     }
 
     if (elem.id == "gs") {
+      let bookArea = document.querySelector("#book");
+      bookArea.innerHTML = ``;
       this.initTopMain("getdayserv");
     }
 
@@ -170,10 +224,31 @@ class Home {
           this.serv = selectie.options[selectie.selectedIndex].textContent;
     
           top.innerHTML = ``;
-          this.loadSlotsZi(this.d1, this.serv);
-          console.log(this.sloturi);
+          await this.showDay();
+          
               
     }
   };
+
+  changeCard =async (e) => {
+    let celm = e.target;
+    if (celm.id == "dclient" || celm.id == "dobs") {
+      console.log(celm.parentNode);
+      let copii = celm.parentNode.children;
+      let id = copii[0].textContent;
+       
+      let book = this.sloturi.filter(a => a.id == id)
+      
+      book[0].client = copii[4].value;
+      book[0].obs = copii[6].value;
+      
+      console.log(book[0]);
+      let response=await this.updateBook(book[0]);
+      let top = document.querySelector(".topmain");
+      top.innerHTML = ``;
+      await this.showDay();
+  
+    }  
+  }
 }
 export { Home };

@@ -9,7 +9,7 @@ class Api{
             }
         };
         if (body != null) {
-            option.body = JSON.stringify(body);
+            options.body = JSON.stringify(body);
         }
         return fetch(url, options);
     }
@@ -31,12 +31,24 @@ class Api{
         try {
             
             let response = await this.api(path, "GET");
+
             return response.json();
         } catch (e) {
             throw new Error(e);
         }
     }
 
+    updateProgramare = async (book) => {
+        
+        let path = "http://localhost:8080/api/v1/booking/upd/" + book.id;
+        try {
+            let response=await this.api(path, "PUT", book);
+            return response;   
+        } catch (e) {
+            throw new Error(e);
+        }
+        
+    }
 }
 
 export { Api };
